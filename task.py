@@ -289,8 +289,12 @@ class Task(object):
             self.image_name,
             'bash', '-c', bash_cmd,
         ]
+        print("-------------------")
+        print(cmd)
+        print("-------------------")
 
         with open(self.log_path, 'w+') as f:
+
             self._handler = subprocess.Popen(
                 cmd,
                 stdout=f,
