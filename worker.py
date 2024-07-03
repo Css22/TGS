@@ -155,8 +155,9 @@ class Worker(object):
         self._tasks[task._job_id] = task
         cmd = task.run(self._mount)
 
-        self._logger.info(f'{self._worker_id}, execute, {task._job_id}, {task._gpus}, {task._priority}, {" ".join(cmd)}')
+        # self._logger.info(f'{self._worker_id}, execute, {task._job_id}, {task._gpus}, {task._priority}, {" ".join(cmd)}')
 
+        self._logger.info(f'------------------------------------------------{cmd}------------------------------------------------')
         return success
     
 
@@ -238,6 +239,8 @@ if __name__ == '__main__':
     parser.add_argument('--log_path', type=str,  required=True) # default='results/test_tgs_results.csv')
     parser.add_argument('--need_throughput', action='store_true', default=False)
     args = parser.parse_args()
+    
+
 
     subprocess.call('docker stop $(docker ps -q)', shell=True)
     subprocess.call('docker rm $(docker ps -aq)', shell=True)
