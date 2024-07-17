@@ -390,8 +390,10 @@ static void *limit_manager(void *v_device) {
 
   
   while (1) {
+    // 尝试连接 （小于0代表连接失败，并将连接成功的地址存在clientaddr中）connfd是连接成功的套接字。
     if ((connfd = accept(listenfd, (struct sockaddr *)&clientaddr, &clientlen)) < 0)
       LOGGER(FATAL, "accept error\n");
+    // client_hostname保存客户端名字 client_port保存端口，返回非0值表示获取失败。
     if ((ret = getnameinfo((const struct sockaddr *)&clientaddr, clientlen, client_hostname, MAXLINE,
                            client_port, MAXLINE, 0)) != 0)
       LOGGER(FATAL, "getnameinfo error: %s\n", gai_strerror(ret));
@@ -581,7 +583,7 @@ static inline void rate_limiter(const long long kernel_size) {
   __sync_add_and_fetch_8(&g_rate_counter[device], kernel_size);
 }
 
-
+// 每50ms，就将g_rate_counter 设为0，并将g_current_rate进行更新
 static void *rate_watcher(void *v_device) {
   const CUdevice device = (uintptr_t)v_device;
   const unsigned long duration = 50;
@@ -615,6 +617,8 @@ static void activate_rate_watcher(CUdevice device) {
 }
 
 
+
+//  g_active_gpu[device] 在完成初始化后就会被置为1
 static inline void initialization(const CUdevice device) {
   g_active_gpu[device] = 1;
 

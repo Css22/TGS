@@ -119,6 +119,8 @@ static int open_clientfd(CUdevice device) {
 }
 
 
+// 每一个内核的启动都会调用rate_estimator，以增加g_rate_counter 中对应的kernel_size。 这个值将会被用于测量kernel的执行速度
+
 static inline void rate_estimator(const long long kernel_size) {
   CUdevice device = 0;
   const CUresult ret = CUDA_ENTRY_CALL(cuda_library_entry, cuCtxGetDevice, &device);
@@ -132,7 +134,7 @@ static inline void rate_estimator(const long long kernel_size) {
   __sync_add_and_fetch_8(&g_rate_counter[device], kernel_size);
 }
 
-
+// 每5s, 将g_rate_counter 设置为0，并将它之前的值 直接设置为g_current_rate
 static void *rate_monitor(void *v_device) {
   const CUdevice device = (uintptr_t)v_device;
   const unsigned long duration = 5000;
@@ -178,7 +180,7 @@ inline double shift_window(double rate_window[], const int WINDOW_SIZE, double r
   return max_window_rate;
 }
 
-
+// 这段代码会一直监控GPU的rate
 static void *rate_watcher(void *v_device) {
   const CUdevice device = (uintptr_t)v_device;
   const unsigned long duration = 5000;
